@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Chip8Emu.Emulator
 {
+    public enum ChipMode { CHIP8, SUPERCHIP, CHIP48 }
+
     internal class Vm
     {
-        const float FRAME_TIMING = 500.0f; // 500Hz
-
         private static byte[] Fonts =
         {
               0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -45,10 +45,15 @@ namespace Chip8Emu.Emulator
 
         public bool[] Keypad; // 16 keys (0x0 to 0xF)
 
-        public bool[] Display; // 64x32 display
-        public PictureBox DisplayPictureBox; // PictureBox for displaying graphics
+        public bool[,] Display; // 64x32 display
+        public PictureBox DisplayPictureBox; // PictureBox for graphics output
+        public bool DrawFlag = true;
 
         Random VmRand = new Random();
+
+        // Settings
+        public ChipMode ChipMode;
+        public float FrameTiming = 700.0f;
 
         public void ResetVm()
         {
@@ -61,16 +66,18 @@ namespace Chip8Emu.Emulator
             SP = 0;
             Stack = new Stack<ushort>();
             Keypad = new bool[16]; // 0x0 to 0xF
-            Display = new bool[64 * 32];
+            Display = new bool[64,32];
+            DrawFlag = true;
             for (int i = 0; i < Fonts.Length; i++) // Load fontset into memory
             {
                 Memory[i] = Fonts[i];
             }
         }
 
-        public Vm(PictureBox pictureBoxDisplay)
+        public Vm(ChipMode chipMode, PictureBox pictureBoxDisplay)
         {
             ResetVm();
+            ChipMode = chipMode;
             DisplayPictureBox = pictureBoxDisplay;
         }
 
@@ -113,7 +120,7 @@ namespace Chip8Emu.Emulator
                 {
                     for (int x = 0; x < 64; x++)
                     {
-                        bitmap.SetPixel(x, y, Display[y * 64 + x] ? Color.White : Color.Black);
+                        bitmap.SetPixel(x, y, Display[x,y] ? Color.White : Color.Black);
                     }
                 }
 
@@ -168,6 +175,8 @@ namespace Chip8Emu.Emulator
                     {
                         case 0x00E0: // CLS
                             // Clear the display.
+                            Display = new bool[64, 32];
+                            DrawFlag = true;
                             break;
                         case 0x00EE: // RET
                             // Return from a subroutine.
@@ -244,28 +253,38 @@ namespace Chip8Emu.Emulator
                             break;
                         case 0x0004: // ADD Vx, Vy
                             // Set Vx = Vx + Vy, set VF = carry.
-                            byte sum = (byte)(Registers[(opcode & 0x0F00) >> 8] + Registers[(opcode & 0x00F0) >> 4]);
-                            Registers[15] = (byte)((sum < Registers[(opcode & 0x0F00) >> 8]) ? 1 : 0);
-                            Registers[(opcode & 0x0F00) >> 8] = sum;
+                            ushort sum = (ushort)(Registers[(opcode & 0x0F00) >> 8] + Registers[(opcode & 0x00F0) >> 4]);
+                            Registers[(opcode & 0x0F00) >> 8] = (byte)sum;
+                            Registers[0xF] = sum > 255 ? (byte)1 : (byte)0; // Set carry flag
                             break;
                         case 0x0005: // SUB Vx, Vy
                             // Set Vx = Vx - Vy, set VF = NOT borrow.
-                            Registers[15] = (byte)((Registers[(opcode & 0x0F00) >> 8] > Registers[(opcode & 0x00F0) >> 4]) ? 1 : 0);
-                            Registers[(opcode & 0x0F00) >> 8] -= Registers[(opcode & 0x00F0) >> 4];
+                            byte Vx = Registers[(opcode & 0x0F00) >> 8];
+                            byte Vy = Registers[(opcode & 0x00F0) >> 4];
+                            Registers[(opcode & 0x0F00) >> 8] = (byte)(Vx - Vy);
+                            Registers[0xF] = (byte)(Vx >= Vy ? 1 : 0);
                             break;
                         case 0x0006: // SHR Vx {, Vy}
                             // Set Vx = Vx SHR 1.
-                            Registers[15] = (byte)(Registers[(opcode & 0x0F00) >> 8] & 0x1);
+                            if (ChipMode == ChipMode.CHIP8)
+                            {
+                                Registers[(opcode & 0x0F00) >> 8] = Registers[(opcode & 0x00F0) >> 4];
+                            }
+                            Registers[0xF] = (byte)(Registers[(opcode & 0x0F00) >> 8] & 0x1);
                             Registers[(opcode & 0x0F00) >> 8] >>= 1;
                             break;
                         case 0x0007: // SUBN Vx, Vy
                             // Set Vx = Vy - Vx, set VF = NOT borrow.
-                            Registers[15] = (byte)((Registers[(opcode & 0x00F0) >> 4] > Registers[(opcode & 0x0F00) >> 8]) ? 1 : 0);
                             Registers[(opcode & 0x0F00) >> 8] = (byte)(Registers[(opcode & 0x00F0) >> 4] - Registers[(opcode & 0x0F00) >> 8]);
+                            Registers[0xF] = (byte)((Registers[(opcode & 0x00F0) >> 4] > Registers[(opcode & 0x0F00) >> 8]) ? 1 : 0);
                             break;
                         case 0x000E: // SHL Vx {, Vy}
                             // Set Vx = Vx SHL 1.
-                            Registers[15] = (byte)((Registers[(opcode & 0x0F00) >> 8] & 0x80) >> 7);
+                            if (ChipMode == ChipMode.CHIP8)
+                            {
+                                Registers[(opcode & 0x0F00) >> 8] = Registers[(opcode & 0x00F0) >> 4];
+                            }
+                            Registers[0xF] = (byte)((Registers[(opcode & 0x0F00) >> 8] & 0x80) >> 7);
                             Registers[(opcode & 0x0F00) >> 8] <<= 1;
                             break;
                     }
@@ -296,24 +315,45 @@ namespace Chip8Emu.Emulator
 
                 case 0xD000: // DRW Vx, Vy, nibble
                     // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
-                    byte x = Registers[(opcode & 0x0F00) >> 8];
-                    byte y = Registers[(opcode & 0x00F0) >> 4];
-                    byte height = (byte)(opcode & 0x000F);
+                    byte x = (byte)(Registers[(opcode & 0x0F00) >> 8] & 63); // VX & 63
+                    byte y = (byte)(Registers[(opcode & 0x00F0) >> 4] & 31); // VY & 31
+                    byte height = (byte)(opcode & 0x000F); // N
+                    Registers[0xF] = 0;
+
                     for (int row = 0; row < height; row++)
                     {
-                        byte sprite = Memory[I + row];
-                        for (int col = 0; col < 8; col++)
+                        byte spriteByte = Memory[I + row];
+                        int posY = y + row;
+                        if (posY >= 32) break; // Stop if bottom edge reached
+
+                        for (int bit = 0; bit < 8; bit++)
                         {
-                            if ((sprite & 0x80 >> col) != 0)
+                            int posX = x + bit;
+                            if (posX >= 64) break; // Stop if right edge reached
+
+                            // Get the sprite pixel
+                            bool spritePixel = (spriteByte & (0x80 >> bit)) != 0;
+
+                            if (spritePixel)
                             {
-                                int pixelIndex = (y + row) % 32 * 64 + (x + col) % 64;
-                                Display[pixelIndex] ^= true;
+                                // XOR the pixel on screen
+                                if (Display[posX, posY])
+                                {
+                                    Display[posX, posY] = false;
+                                    Registers[0xF] = 1;
+                                }
+                                else
+                                {
+                                    Display[posX, posY] = true;
+                                }
                             }
                         }
                     }
+
+                    DrawFlag = true; // Signal that the screen should be redrawn
                     break;
 
-                case 0xE000: // EX                                              ## TODO ##
+                case 0xE000: // EX
                     switch (opcode & 0x00FF)
                     {
                         case 0x009E: // SKP Vx
@@ -403,7 +443,7 @@ namespace Chip8Emu.Emulator
             }
 
             // Update timers
-            TimerAccumulator += 60.0f / FRAME_TIMING;
+            TimerAccumulator += 60.0f / FrameTiming;
             if (TimerAccumulator >= 1.0f)
             {
                 TimerAccumulator -= 1.0f;
@@ -417,7 +457,11 @@ namespace Chip8Emu.Emulator
                 }
             }
 
-            UpdateDisplay();
+            if (DrawFlag)
+            {
+                DrawFlag = false;
+                UpdateDisplay();
+            }
         }
     }
 }
