@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Drawing;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -31,6 +32,8 @@ namespace Chip8Emu
         public ChipMode CurrentChipMode = ChipMode.CHIP8; // Default to CHIP-8 mode
         public float FrameTiming = 700.0f; // 700Hz timing
 
+        public SoundPlayer buzzer;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -39,8 +42,10 @@ namespace Chip8Emu
             this.KeyDown += new KeyEventHandler(MainWindow_KeyDown);
             this.KeyUp += new KeyEventHandler(MainWindow_KeyUp);
 
+            buzzer = new SoundPlayer("./tone.wav");
+
             // Initialize the emulator
-            vm = new Vm(CurrentChipMode, pictureBox1);
+            vm = new Vm(CurrentChipMode, pictureBox1, buzzer);
             vm.FrameTiming = FrameTiming;
         }
 

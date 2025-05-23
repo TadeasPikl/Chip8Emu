@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -48,6 +49,9 @@ namespace Chip8Emu.Emulator
         public PictureBox DisplayPictureBox; // PictureBox for graphics output
         public bool DrawFlag = true;
 
+        public SoundPlayer Buzzer;
+        public bool buzzerPlaying = false;
+
         private Random VmRand = new Random();
 
         // Settings
@@ -74,11 +78,12 @@ namespace Chip8Emu.Emulator
             }
         }
 
-        public Vm(ChipMode chipMode, PictureBox pictureBoxDisplay)
+        public Vm(ChipMode chipMode, PictureBox pictureBoxDisplay, SoundPlayer buzzer)
         {
             ResetVm();
             ChipMode = chipMode;
             DisplayPictureBox = pictureBoxDisplay;
+            Buzzer = buzzer;
         }
 
         public void LoadRom(Stream romStream)
@@ -438,6 +443,25 @@ namespace Chip8Emu.Emulator
                     SoundTimer--;
                 }
             }
+
+            // Handle audio
+            if (SoundTimer > 0)
+            {
+                if (!buzzerPlaying)
+                {
+                    Buzzer.PlayLooping();
+                    buzzerPlaying = true;
+                }
+            }
+            else
+            {
+                if (buzzerPlaying)
+                {
+                    Buzzer.Stop();
+                    buzzerPlaying = false;
+                }
+            }
+
 
             if (DrawFlag)
             {

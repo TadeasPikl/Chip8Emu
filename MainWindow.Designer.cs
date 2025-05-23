@@ -79,7 +79,7 @@
             // 
             colorsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { foregroundToolStripMenuItem, backgroundToolStripMenuItem });
             colorsToolStripMenuItem.Name = "colorsToolStripMenuItem";
-            colorsToolStripMenuItem.Size = new Size(224, 26);
+            colorsToolStripMenuItem.Size = new Size(163, 26);
             colorsToolStripMenuItem.Text = "Colors";
             // 
             // foregroundToolStripMenuItem
@@ -101,7 +101,7 @@
             displayHzToolStripMenuItem.Checked = true;
             displayHzToolStripMenuItem.CheckState = CheckState.Checked;
             displayHzToolStripMenuItem.Name = "displayHzToolStripMenuItem";
-            displayHzToolStripMenuItem.Size = new Size(224, 26);
+            displayHzToolStripMenuItem.Size = new Size(163, 26);
             displayHzToolStripMenuItem.Text = "Display Hz";
             displayHzToolStripMenuItem.Click += displayHzToolStripMenuItem_Click;
             // 
