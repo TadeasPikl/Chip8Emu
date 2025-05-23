@@ -153,6 +153,7 @@ namespace Chip8Emu
                 case Keys.X: return 0x0;
                 case Keys.C: return 0xB;
                 case Keys.V: return 0xF;
+
                 default: return null;
             }
         }

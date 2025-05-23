@@ -205,14 +205,17 @@ namespace Chip8Emu.Emulator
                         case 0x0001: // OR Vx, Vy
                             // Set Vx = Vx OR Vy.
                             Registers[(opcode & 0x0F00) >> 8] |= Registers[(opcode & 0x00F0) >> 4];
+                            Registers[0xF] = 0;
                             break;
                         case 0x0002: // AND Vx, Vy
                             // Set Vx = Vx AND Vy.
                             Registers[(opcode & 0x0F00) >> 8] &= Registers[(opcode & 0x00F0) >> 4];
+                            Registers[0xF] = 0;
                             break;
                         case 0x0003: // XOR Vx, Vy
                             // Set Vx = Vx XOR Vy.
                             Registers[(opcode & 0x0F00) >> 8] ^= Registers[(opcode & 0x00F0) >> 4];
+                            Registers[0xF] = 0;
                             break;
                         case 0x0004: // ADD Vx, Vy
                             // Set Vx = Vx + Vy, set VF = carry.
@@ -222,19 +225,25 @@ namespace Chip8Emu.Emulator
                             break;
                         case 0x0005: // SUB Vx, Vy
                             // Set Vx = Vx - Vy, set VF = NOT borrow.
-                            byte Vx = Registers[(opcode & 0x0F00) >> 8];
-                            byte Vy = Registers[(opcode & 0x00F0) >> 4];
-                            Registers[(opcode & 0x0F00) >> 8] = (byte)(Vx - Vy);
-                            Registers[0xF] = (byte)(Vx >= Vy ? 1 : 0);
+                            byte xa = Registers[(opcode & 0x0F00) >> 8];
+                            byte ya = Registers[(opcode & 0x00F0) >> 4];
+                            Registers[(opcode & 0x0F00) >> 8] = (byte)(xa - ya);
+                            Registers[0xF] = (byte)(xa >= ya ? 1 : 0);
                             break;
                         case 0x0006: // SHR Vx {, Vy}
                             // Set Vx = Vx SHR 1.
+                            int x86 = (opcode & 0x0F00) >> 8;
+                            int y86 = (opcode & 0x00F0) >> 4;
+
+                            byte value86 = Registers[x86];
                             if (ChipMode == ChipMode.CHIP8)
                             {
-                                Registers[(opcode & 0x0F00) >> 8] = Registers[(opcode & 0x00F0) >> 4];
+                                value86 = Registers[y86];
                             }
-                            Registers[0xF] = (byte)(Registers[(opcode & 0x0F00) >> 8] & 0x1);
-                            Registers[(opcode & 0x0F00) >> 8] >>= 1;
+
+                            byte changeF86 = (byte)(value86 & 0x1);
+                            Registers[x86] = (byte)(value86 >> 1);
+                            Registers[0xF] = changeF86;
                             break;
                         case 0x0007: // SUBN Vx, Vy
                             // Set Vx = Vy - Vx, set VF = NOT borrow.
@@ -243,12 +252,18 @@ namespace Chip8Emu.Emulator
                             break;
                         case 0x000E: // SHL Vx {, Vy}
                             // Set Vx = Vx SHL 1.
+                            int x8E = (opcode & 0x0F00) >> 8;
+                            int y8E = (opcode & 0x00F0) >> 4;
+
+                            byte value8E = Registers[x8E];
                             if (ChipMode == ChipMode.CHIP8)
                             {
-                                Registers[(opcode & 0x0F00) >> 8] = Registers[(opcode & 0x00F0) >> 4];
+                                value8E = Registers[y8E];
                             }
-                            Registers[0xF] = (byte)((Registers[(opcode & 0x0F00) >> 8] & 0x80) >> 7);
-                            Registers[(opcode & 0x0F00) >> 8] <<= 1;
+
+                            byte changeF8E = (byte)((value8E & 0x80) >> 7);
+                            Registers[x8E] = (byte)(value8E << 1);
+                            Registers[0xF] = changeF8E;
                             break;
                     }
                     break;

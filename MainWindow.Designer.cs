@@ -31,7 +31,6 @@
             pictureBox1 = new PictureBox();
             menuStrip1 = new MenuStrip();
             loadROMToolStripMenuItem = new ToolStripMenuItem();
-            toolStripMenuItem1 = new ToolStripMenuItem();
             frequencyLabel = new Label();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             menuStrip1.SuspendLayout();
@@ -50,7 +49,7 @@
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { loadROMToolStripMenuItem, toolStripMenuItem1 });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { loadROMToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(605, 28);
@@ -63,11 +62,6 @@
             loadROMToolStripMenuItem.Size = new Size(93, 24);
             loadROMToolStripMenuItem.Text = "Load ROM";
             loadROMToolStripMenuItem.Click += loadROMToolStripMenuItem_Click;
-            // 
-            // toolStripMenuItem1
-            // 
-            toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(14, 24);
             // 
             // frequencyLabel
             // 
@@ -100,7 +94,6 @@
         private PictureBox pictureBox1;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem loadROMToolStripMenuItem;
-        private ToolStripMenuItem toolStripMenuItem1;
         private Label frequencyLabel;
     }
 }
