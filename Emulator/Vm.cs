@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Chip8Emu.Emulator
 {
-    public enum ChipMode { CHIP8, SUPERCHIP, CHIP48 }
+    public enum ChipMode { CHIP8, SUPERCHIP }
 
     internal class Vm
     {
@@ -30,18 +30,17 @@ namespace Chip8Emu.Emulator
               0xF0, 0x80, 0xF0, 0x80, 0x80  // F
         };
 
-        public byte[] Memory;
+        private byte[] Memory;
 
-        public byte[] Registers;
-        public ushort I; // Index register
-        public byte DelayTimer;
+        private byte[] Registers;
+        private ushort I; // Index register
+        private byte DelayTimer;
         public byte SoundTimer;
-        public float TimerAccumulator = 0.0f;
+        private float TimerAccumulator = 0.0f;
 
-        public ushort PC; // Program Counter
-        public byte SP; // Stack Pointer
+        private ushort PC; // Program Counter
 
-        public Stack<ushort> Stack;
+        private Stack<ushort> Stack;
 
         public bool[] Keypad; // 16 keys (0x0 to 0xF)
 
@@ -49,11 +48,13 @@ namespace Chip8Emu.Emulator
         public PictureBox DisplayPictureBox; // PictureBox for graphics output
         public bool DrawFlag = true;
 
-        Random VmRand = new Random();
+        private Random VmRand = new Random();
 
         // Settings
         public ChipMode ChipMode;
         public float FrameTiming = 700.0f;
+        public Color ForegroundColor = Color.White;
+        public Color BackgroundColor = Color.Black;
 
         public void ResetVm()
         {
@@ -63,7 +64,6 @@ namespace Chip8Emu.Emulator
             DelayTimer = 0;
             SoundTimer = 0;
             PC = 0x200;
-            SP = 0;
             Stack = new Stack<ushort>();
             Keypad = new bool[16]; // 0x0 to 0xF
             Display = new bool[64,32];
@@ -118,7 +118,7 @@ namespace Chip8Emu.Emulator
             {
                 for (int x = 0; x < 64; x++)
                 {
-                    bitmap.SetPixel(x, y, Display[x, y] ? Color.White : Color.Black);
+                    bitmap.SetPixel(x, y, Display[x, y] ? ForegroundColor : BackgroundColor);
                 }
             }
             return bitmap;
@@ -403,6 +403,8 @@ namespace Chip8Emu.Emulator
                             {
                                 Memory[I + j] = Registers[j];
                             }
+                            // I is set to I + x + 1 after operation
+                            I += (ushort)(((opcode & 0x0F00) >> 8) + 1);
                             break;
                         case 0x0065: // LD Vx, [I]
                             // Read registers V0 through Vx from memory starting at location I.
@@ -410,6 +412,8 @@ namespace Chip8Emu.Emulator
                             {
                                 Registers[j] = Memory[I + j];
                             }
+                            // I is set to I + x + 1 after operation
+                            I += (ushort)(((opcode & 0x0F00) >> 8) + 1);
                             break;
                     }
                     break;

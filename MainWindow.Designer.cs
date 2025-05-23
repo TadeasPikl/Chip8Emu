@@ -31,6 +31,11 @@
             pictureBox1 = new PictureBox();
             menuStrip1 = new MenuStrip();
             loadROMToolStripMenuItem = new ToolStripMenuItem();
+            displayToolStripMenuItem = new ToolStripMenuItem();
+            colorsToolStripMenuItem = new ToolStripMenuItem();
+            foregroundToolStripMenuItem = new ToolStripMenuItem();
+            backgroundToolStripMenuItem = new ToolStripMenuItem();
+            displayHzToolStripMenuItem = new ToolStripMenuItem();
             frequencyLabel = new Label();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             menuStrip1.SuspendLayout();
@@ -49,7 +54,7 @@
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { loadROMToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { loadROMToolStripMenuItem, displayToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(605, 28);
@@ -62,6 +67,43 @@
             loadROMToolStripMenuItem.Size = new Size(93, 24);
             loadROMToolStripMenuItem.Text = "Load ROM";
             loadROMToolStripMenuItem.Click += loadROMToolStripMenuItem_Click;
+            // 
+            // displayToolStripMenuItem
+            // 
+            displayToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { colorsToolStripMenuItem, displayHzToolStripMenuItem });
+            displayToolStripMenuItem.Name = "displayToolStripMenuItem";
+            displayToolStripMenuItem.Size = new Size(72, 24);
+            displayToolStripMenuItem.Text = "Display";
+            // 
+            // colorsToolStripMenuItem
+            // 
+            colorsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { foregroundToolStripMenuItem, backgroundToolStripMenuItem });
+            colorsToolStripMenuItem.Name = "colorsToolStripMenuItem";
+            colorsToolStripMenuItem.Size = new Size(224, 26);
+            colorsToolStripMenuItem.Text = "Colors";
+            // 
+            // foregroundToolStripMenuItem
+            // 
+            foregroundToolStripMenuItem.Name = "foregroundToolStripMenuItem";
+            foregroundToolStripMenuItem.Size = new Size(171, 26);
+            foregroundToolStripMenuItem.Text = "Foreground";
+            foregroundToolStripMenuItem.Click += foregroundToolStripMenuItem_Click;
+            // 
+            // backgroundToolStripMenuItem
+            // 
+            backgroundToolStripMenuItem.Name = "backgroundToolStripMenuItem";
+            backgroundToolStripMenuItem.Size = new Size(171, 26);
+            backgroundToolStripMenuItem.Text = "Background";
+            backgroundToolStripMenuItem.Click += backgroundToolStripMenuItem_Click;
+            // 
+            // displayHzToolStripMenuItem
+            // 
+            displayHzToolStripMenuItem.Checked = true;
+            displayHzToolStripMenuItem.CheckState = CheckState.Checked;
+            displayHzToolStripMenuItem.Name = "displayHzToolStripMenuItem";
+            displayHzToolStripMenuItem.Size = new Size(224, 26);
+            displayHzToolStripMenuItem.Text = "Display Hz";
+            displayHzToolStripMenuItem.Click += displayHzToolStripMenuItem_Click;
             // 
             // frequencyLabel
             // 
@@ -95,5 +137,10 @@
         private MenuStrip menuStrip1;
         private ToolStripMenuItem loadROMToolStripMenuItem;
         private Label frequencyLabel;
+        private ToolStripMenuItem displayToolStripMenuItem;
+        private ToolStripMenuItem colorsToolStripMenuItem;
+        private ToolStripMenuItem foregroundToolStripMenuItem;
+        private ToolStripMenuItem backgroundToolStripMenuItem;
+        private ToolStripMenuItem displayHzToolStripMenuItem;
     }
 }

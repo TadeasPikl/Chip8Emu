@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Timer = System.Threading.Timer;
 
 namespace Chip8Emu
@@ -19,7 +20,7 @@ namespace Chip8Emu
         private Vm vm;
         private bool isRunning = false;
         private CancellationTokenSource? mainLoopCts;
-        
+
         private int cycleCounter = 0;
         private Timer updateTimer;
         private Stopwatch frequencyStopwatch = new Stopwatch();
@@ -37,8 +38,6 @@ namespace Chip8Emu
             this.KeyPreview = true;
             this.KeyDown += new KeyEventHandler(MainWindow_KeyDown);
             this.KeyUp += new KeyEventHandler(MainWindow_KeyUp);
-
-            this.ResizeEnd += new EventHandler(MainWindow_ResizeEnd);
 
             // Initialize the emulator
             vm = new Vm(CurrentChipMode, pictureBox1);
@@ -87,7 +86,7 @@ namespace Chip8Emu
             {
                 g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
                 g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
-                g.Clear(Color.Black);
+                g.Clear(vm.BackgroundColor);
 
                 int offsetX = (boxWidth - targetWidth) / 2;
                 int offsetY = (boxHeight - targetHeight) / 2;
@@ -155,14 +154,6 @@ namespace Chip8Emu
                 case Keys.V: return 0xF;
 
                 default: return null;
-            }
-        }
-
-        private void MainWindow_ResizeEnd(object? sender, EventArgs e)
-        {
-            if (vm != null)
-            {
-                vm.DrawFlag = true;
             }
         }
 
@@ -244,5 +235,38 @@ namespace Chip8Emu
             base.OnFormClosing(e);
         }
 
+        private void foregroundToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ColorDialog MyDialog = new ColorDialog();
+            if (MyDialog.ShowDialog() == DialogResult.OK)
+            {
+                vm.ForegroundColor = MyDialog.Color;
+            }
+            vm.DrawFlag = true;
+        }
+        private void backgroundToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ColorDialog MyDialog = new ColorDialog();
+            if (MyDialog.ShowDialog() == DialogResult.OK)
+            {
+                vm.BackgroundColor = MyDialog.Color;
+            }
+            vm.DrawFlag = true;
+        }
+
+        private void displayHzToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // toggle displayHz
+            if (displayHzToolStripMenuItem.Checked)
+            {
+                displayHzToolStripMenuItem.Checked = false;
+                frequencyLabel.Visible = false;
+            }
+            else
+            {
+                displayHzToolStripMenuItem.Checked = true;
+                frequencyLabel.Visible = true;
+            }
+        }
     }
 }
