@@ -111,56 +111,19 @@ namespace Chip8Emu.Emulator
             }
         }
 
-        public void UpdateDisplay()
+        public Bitmap BuildDisplayBitmap()
         {
-            if (DisplayPictureBox != null)
+            Bitmap bitmap = new Bitmap(64, 32);
+            for (int y = 0; y < 32; y++)
             {
-                Bitmap bitmap = new Bitmap(64, 32);
-                for (int y = 0; y < 32; y++)
+                for (int x = 0; x < 64; x++)
                 {
-                    for (int x = 0; x < 64; x++)
-                    {
-                        bitmap.SetPixel(x, y, Display[x,y] ? Color.White : Color.Black);
-                    }
+                    bitmap.SetPixel(x, y, Display[x, y] ? Color.White : Color.Black);
                 }
-
-                // PictureBox dimensions
-                int boxWidth = DisplayPictureBox.Width;
-                int boxHeight = DisplayPictureBox.Height;
-
-                // Calculate aspect-ratio-preserving target size
-                float sourceAspect = 64f / 32f;
-                float boxAspect = (float)boxWidth / boxHeight;
-
-                int targetWidth, targetHeight;
-                if (boxAspect > sourceAspect)
-                {
-                    targetHeight = boxHeight;
-                    targetWidth = (int)(targetHeight * sourceAspect);
-                }
-                else
-                {
-                    targetWidth = boxWidth;
-                    targetHeight = (int)(targetWidth / sourceAspect);
-                }
-
-                // Create final bitmap (same size as PictureBox)
-                Bitmap finalImage = new Bitmap(boxWidth, boxHeight);
-                using (Graphics g = Graphics.FromImage(finalImage))
-                {
-                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-                    g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
-                    g.Clear(Color.Black); // Clear background to black
-
-                    // Center the upscaled image
-                    int offsetX = (boxWidth - targetWidth) / 2;
-                    int offsetY = (boxHeight - targetHeight) / 2;
-                    g.DrawImage(bitmap, new Rectangle(offsetX, offsetY, targetWidth, targetHeight));
-                }
-
-                DisplayPictureBox.Image = finalImage;
             }
+            return bitmap;
         }
+
 
         public void Cycle()
         {
@@ -460,7 +423,7 @@ namespace Chip8Emu.Emulator
             if (DrawFlag)
             {
                 DrawFlag = false;
-                UpdateDisplay();
+                BuildDisplayBitmap();
             }
         }
     }
